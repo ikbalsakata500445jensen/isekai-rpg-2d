@@ -1,5 +1,7 @@
 # AETHERIA REBORN: The Otherworld Contract
 
+**Play it right now: https://isekai-rpg-2d.pages.dev**
+
 A top-down 2D action RPG. Yuna, an ordinary schoolgirl, gets hit by Truck-kun
 and wakes up in Aetheria with a health bar over her head. Goddess Aqua hands
 her a contract: three shattered relic fragments, three realms, one Demon Lord
