@@ -41,6 +41,9 @@ ctx.imageSmoothingEnabled=false;
 const W=960,H=540;
 function fit(){const s=Math.min(innerWidth/W,innerHeight/H)*0.96;cv.style.width=(W*s)+'px';cv.style.height=(H*s)+'px';}
 addEventListener('resize',fit);fit();
+/* first paint before the sprite caravan arrives, so slow networks see a
+   summoning screen instead of a black void */
+ctx.fillStyle='#0b0e1a';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ffe66d';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.fillText('SUMMONING YUNA...',W/2,H/2-10);ctx.fillStyle='#8f8fa8';ctx.font='13px monospace';ctx.fillText('Truck-kun is on his way',W/2,H/2+18);
 
 /* ---------- ASSET LOADER (real user packs, graceful fallback) ---------- */
 function loadImg(url){return new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=url;});}
@@ -51,34 +54,46 @@ draw(c,sx,sy,dw,dh,frame,flip){frame=((frame|0)%this.n+this.n)%this.n;if(!this.i
 const A={};
 async function loadAssets(){
 const g=(p)=>'assets/'+p;
-A.yunaIdle=new Spr(await firstOf([g('schoolgirl/Girl_2/Idle.png'),g('hero/1/Idle.png')]));
-A.yunaWalk=new Spr(await firstOf([g('schoolgirl/Girl_2/Walk.png'),g('hero/1/Walk.png'),g('hero/1/Run.png')]));
-A.yunaAtk=new Spr(await firstOf([g('schoolgirl/Girl_2/Attack.png'),g('hero/1/Attack1.png'),g('hero/1/Attack2.png')]));
-A.yunaHurt=new Spr(await firstOf([g('hero/1/Hurt.png'),g('schoolgirl/Girl_2/Protection.png')]));
-A.slimeB=new Spr(await firstOf([g('slime/Blue_Slime/Idle.png')]));A.slimeBWalk=new Spr(await firstOf([g('slime/Blue_Slime/walk.png'),g('slime/Blue_Slime/Run.png'),g('slime/Blue_Slime/Idle.png')]));
-A.slimeBAtk=new Spr(await firstOf([g('slime/Blue_Slime/Attack_1.png'),g('slime/Blue_Slime/Idle.png')]));A.slimeBHurt=new Spr(await firstOf([g('slime/Blue_Slime/Hurt.png')]));A.slimeBDead=new Spr(await firstOf([g('slime/Blue_Slime/Dead.png')]));
-A.slimeR=new Spr(await firstOf([g('slime/Red_Slime/Idle.png')]));A.slimeRWalk=new Spr(await firstOf([g('slime/Red_Slime/Walk.png'),g('slime/Red_Slime/Run.png')]));A.slimeRAtk=new Spr(await firstOf([g('slime/Red_Slime/Attack_1.png')]));A.slimeRDead=new Spr(await firstOf([g('slime/Red_Slime/Dead.png')]));
-A.slimeG=new Spr(await firstOf([g('slime/Green_Slime/Idle.png'),g('slime/Blue_Slime/Idle.png')]));
-A.ghost=new Spr(await firstOf([g('ghost/Onre/Idle.png')]));A.ghostFly=new Spr(await firstOf([g('ghost/Onre/Flight.png'),g('ghost/Onre/Walk.png')]));A.ghostAtk=new Spr(await firstOf([g('ghost/Onre/Attack_2.png')]));A.ghostDead=new Spr(await firstOf([g('ghost/Onre/Dead.png')]));
-A.mino=new Spr(await firstOf([g('minotaur/Minotaur_1/Idle.png')]));A.minoWalk=new Spr(await firstOf([g('minotaur/Minotaur_1/Walk.png')]));A.minoAtk=new Spr(await firstOf([g('minotaur/Minotaur_1/Attack.png')]));A.minoDead=new Spr(await firstOf([g('minotaur/Minotaur_1/Dead.png')]));
-A.tengu=new Spr(await firstOf([g('yokai/Karasu_tengu/Idle.png')]));A.tenguWalk=new Spr(await firstOf([g('yokai/Karasu_tengu/Walk.png')]));A.tenguAtk=new Spr(await firstOf([g('yokai/Karasu_tengu/Attack_2.png')]));A.tenguDead=new Spr(await firstOf([g('yokai/Karasu_tengu/Dead.png')]));
-A.vamp=new Spr(await firstOf([g('vampire/Countess_Vampire/Idle.png')]));A.vampWalk=new Spr(await firstOf([g('vampire/Countess_Vampire/Walk.png'),g('vampire/Countess_Vampire/Run.png')]));A.vampAtk=new Spr(await firstOf([g('vampire/Countess_Vampire/Attack_1.png')]));A.vampDead=new Spr(await firstOf([g('vampire/Countess_Vampire/Dead.png')]));
-A.lizard=new Spr(await firstOf([g('monsters/PNG/lizard/Walk1.png'),g('monsters/PNG/medusa/Walk1.png')]));
-A.medusa=new Spr(await firstOf([g('monsters/PNG/medusa/Walk1.png')]));
-A.dragon=new Spr(await firstOf([g('monsters/PNG/small_dragon/Walk1.png'),g('monsters/PNG/dragon/Walk1.png')]));
-A.bossIdle=new Spr(await firstOf([g('boss4dir/Viking Leader/PNG/PNG Sequences/Front - Idle/Front - Idle_000.png'),g('demon/PNG/Demon_warriors_faces_transperent/Character1_face1.png')]));
-A.bgPlains=await firstOf([g('battleground/PNG/Battleground4/Bright/Battleground4.png'),g('backgrounds/7/2304x1296.png')]);
-A.bgForest=await firstOf([g('backgrounds/7/2304x1296.png'),g('backgrounds/6/2304x1296.png')]);
-A.bgDark=await firstOf([g('battleground/PNG/Battleground4/Pale/Battleground4.png')]);
-A.tree=await firstOf([g('forest/PNG/Assets_no_shadow/Mega_tree1.png'),g('forest/PNG/Assets_no_shadow/White_tree1.png')]);
-A.tree2=await firstOf([g('forest/PNG/Assets_no_shadow/Curved_tree2.png'),g('forest/PNG/Assets_no_shadow/Light_balls_tree2.png')]);
-A.avAqua=await firstOf([g('elfqueen/Queen/Talk.png'),g('elfqueen/Queen/Smile.png')]);
-A.avGrom=await firstOf([g('npcavatars/NPC_1/Talk.png'),g('npcavatars/NPC_1/Smile.png')]);
-A.avVaelen=await firstOf([g('elfqueen/Queen/Aggression.png'),g('npcavatars/NPC_1/Aggression.png')]);
-A.avYuna=await firstOf([g('schoolgirl/Girl_2/Dialogue.png'),g('schoolgirl/Girl_2/Idle.png')]);
-A.slashFrames=[];for(let i=1;i<=8;i++){const im=await loadImg(g('slash/PNG/9/'+i+'.png'));if(im)A.slashFrames.push(im);}
-A.magicFrames=[];for(let i=1;i<=8;i++){const im=await loadImg(g('magic/Water Ball/PNG/Water Ball_Frame_0'+i+'.png'));if(im)A.magicFrames.push(im);}
-A.iconPotion=await firstOf([g('icons/PNG/Separately/Icon10_1.png')]);
+/* every fetch starts at once: awaiting 40+ sprites one after another cost
+   34s of black screen on a real network (each round trip serial). The
+   promises below are all created first and awaited after, so the browser
+   loads everything in parallel and boot drops to a couple of seconds. */
+const P={};
+P.yunaIdle=firstOf([g('schoolgirl/Girl_2/Idle.png'),g('hero/1/Idle.png')]);
+P.yunaWalk=firstOf([g('schoolgirl/Girl_2/Walk.png'),g('hero/1/Walk.png'),g('hero/1/Run.png')]);
+P.yunaAtk=firstOf([g('schoolgirl/Girl_2/Attack.png'),g('hero/1/Attack1.png'),g('hero/1/Attack2.png')]);
+P.yunaHurt=firstOf([g('hero/1/Hurt.png'),g('schoolgirl/Girl_2/Protection.png')]);
+P.slimeB=firstOf([g('slime/Blue_Slime/Idle.png')]);P.slimeBWalk=firstOf([g('slime/Blue_Slime/walk.png'),g('slime/Blue_Slime/Run.png'),g('slime/Blue_Slime/Idle.png')]);
+P.slimeBAtk=firstOf([g('slime/Blue_Slime/Attack_1.png'),g('slime/Blue_Slime/Idle.png')]);P.slimeBHurt=firstOf([g('slime/Blue_Slime/Hurt.png')]);P.slimeBDead=firstOf([g('slime/Blue_Slime/Dead.png')]);
+P.slimeR=firstOf([g('slime/Red_Slime/Idle.png')]);P.slimeRWalk=firstOf([g('slime/Red_Slime/Walk.png'),g('slime/Red_Slime/Run.png')]);P.slimeRAtk=firstOf([g('slime/Red_Slime/Attack_1.png')]);P.slimeRDead=firstOf([g('slime/Red_Slime/Dead.png')]);
+P.slimeG=firstOf([g('slime/Green_Slime/Idle.png'),g('slime/Blue_Slime/Idle.png')]);
+P.ghost=firstOf([g('ghost/Onre/Idle.png')]);P.ghostFly=firstOf([g('ghost/Onre/Flight.png'),g('ghost/Onre/Walk.png')]);P.ghostAtk=firstOf([g('ghost/Onre/Attack_2.png')]);P.ghostDead=firstOf([g('ghost/Onre/Dead.png')]);
+P.mino=firstOf([g('minotaur/Minotaur_1/Idle.png')]);P.minoWalk=firstOf([g('minotaur/Minotaur_1/Walk.png')]);P.minoAtk=firstOf([g('minotaur/Minotaur_1/Attack.png')]);P.minoDead=firstOf([g('minotaur/Minotaur_1/Dead.png')]);
+P.tengu=firstOf([g('yokai/Karasu_tengu/Idle.png')]);P.tenguWalk=firstOf([g('yokai/Karasu_tengu/Walk.png')]);P.tenguAtk=firstOf([g('yokai/Karasu_tengu/Attack_2.png')]);P.tenguDead=firstOf([g('yokai/Karasu_tengu/Dead.png')]);
+P.vamp=firstOf([g('vampire/Countess_Vampire/Idle.png')]);P.vampWalk=firstOf([g('vampire/Countess_Vampire/Walk.png'),g('vampire/Countess_Vampire/Run.png')]);P.vampAtk=firstOf([g('vampire/Countess_Vampire/Attack_1.png')]);P.vampDead=firstOf([g('vampire/Countess_Vampire/Dead.png')]);
+P.lizard=firstOf([g('monsters/PNG/lizard/Walk1.png'),g('monsters/PNG/medusa/Walk1.png')]);
+P.medusa=firstOf([g('monsters/PNG/medusa/Walk1.png')]);
+P.dragon=firstOf([g('monsters/PNG/small_dragon/Walk1.png'),g('monsters/PNG/dragon/Walk1.png')]);
+P.bossIdle=firstOf([g('boss4dir/Viking Leader/PNG/PNG Sequences/Front - Idle/Front - Idle_000.png'),g('demon/PNG/Demon_warriors_faces_transperent/Character1_face1.png')]);
+P.bgPlains=firstOf([g('battleground/PNG/Battleground4/Bright/Battleground4.png'),g('backgrounds/7/2304x1296.png')]);
+P.bgForest=firstOf([g('backgrounds/7/2304x1296.png'),g('backgrounds/6/2304x1296.png')]);
+P.bgDark=firstOf([g('battleground/PNG/Battleground4/Pale/Battleground4.png')]);
+P.tree=firstOf([g('forest/PNG/Assets_no_shadow/Mega_tree1.png'),g('forest/PNG/Assets_no_shadow/White_tree1.png')]);
+P.tree2=firstOf([g('forest/PNG/Assets_no_shadow/Curved_tree2.png'),g('forest/PNG/Assets_no_shadow/Light_balls_tree2.png')]);
+P.avAqua=firstOf([g('elfqueen/Queen/Talk.png'),g('elfqueen/Queen/Smile.png')]);
+P.avGrom=firstOf([g('npcavatars/NPC_1/Talk.png'),g('npcavatars/NPC_1/Smile.png')]);
+P.avVaelen=firstOf([g('elfqueen/Queen/Aggression.png'),g('npcavatars/NPC_1/Aggression.png')]);
+P.avYuna=firstOf([g('schoolgirl/Girl_2/Dialogue.png'),g('schoolgirl/Girl_2/Idle.png')]);
+P.slash=[];for(let i=1;i<=8;i++)P.slash.push(loadImg(g('slash/PNG/9/'+i+'.png')));
+P.magic=[];for(let i=1;i<=8;i++)P.magic.push(loadImg(g('magic/Water Ball/PNG/Water Ball_Frame_0'+i+'.png')));
+P.iconPotion=firstOf([g('icons/PNG/Separately/Icon10_1.png')]);
+for(const k of Object.keys(P)){if(Array.isArray(P[k])){const rs=await Promise.all(P[k]);P[k]=rs.filter(im=>im);}else P[k]=await P[k];}
+/* backgrounds, trees and dialogue portraits stay raw images (render draws
+   them with drawImage directly); only fighters become Spr frame strips */
+var RAW={bgPlains:1,bgForest:1,bgDark:1,tree:1,tree2:1,avAqua:1,avGrom:1,avVaelen:1,avYuna:1,iconPotion:1};
+for(const k of Object.keys(P)){if(k==='slash'||k==='magic')continue;A[k]=RAW[k]?P[k]:new Spr(P[k]);}
+A.slashFrames=P.slash;A.magicFrames=P.magic;
+A.iconPotion=P.iconPotion;
 }
 
 /* ---------- AUDIO (procedural WebAudio, no files needed) ---------- */
