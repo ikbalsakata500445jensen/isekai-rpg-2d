@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_vfx"]
+emission_shape = 1
+emission_sphere_radius = 10.0
+direction = Vector3(0, 1, 0)
+spread = 45.0
+gravity = Vector3(0, -98, 0)
+initial_velocity_min = 30.0
+initial_velocity_max = 80.0
+scale_min = 2.0
+scale_max = 6.0
+color = Color(#ff006e)
+
+[node name="VFX_spell_sparkle" type="GPUParticles2D"]
+amount = 64
+lifetime = 1.2
+explosiveness = 0.1
+process_material = SubResource("ParticleProcessMaterial_vfx")

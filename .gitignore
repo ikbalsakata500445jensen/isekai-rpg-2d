@@ -1,0 +1,13 @@
+.DS_Store
+# Raw downloaded asset packs (GBs, reference only, never commit).
+_user_assets/
+# Full local asset working dump (1 GB incl. .kra/.psd sources, never commit).
+web/
+# Vercel local state.
+.vercel/
+**/.vercel
+# Godot local / import cache.
+.godot/
+# macOS metadata from unzipped packs.
+__MACOSX/
+**/__MACOSX/

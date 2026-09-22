@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="icon" href="data:,">
+<title>Aetheria Reborn: The Otherworld Contract — Isekai RPG</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;height:100%;background:#0b0e1a;overflow:hidden;font-family:'Courier New',monospace;image-rendering:pixelated}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,#1b2452 0%,#0b0e1a 70%)}
+#frame{position:relative;border:4px solid #3a2f6b;border-radius:10px;box-shadow:0 0 60px #6c5ce755,0 0 0 4px #141126;overflow:hidden}
+canvas{display:block;background:#0b0e1a;image-rendering:pixelated;image-rendering:crisp-edges}
+#touch{position:absolute;inset:0;pointer-events:none;display:none}
+.tbtn{position:absolute;pointer-events:auto;background:#ffffff18;border:2px solid #ffffff55;color:#fff;border-radius:50%;width:58px;height:58px;font-size:11px;font-weight:bold;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:none}
+#joy{position:absolute;left:18px;bottom:18px;width:120px;height:120px;border-radius:50%;background:#ffffff10;border:2px solid #ffffff33;pointer-events:auto;touch-action:none}
+#stick{position:absolute;left:50%;top:50%;width:52px;height:52px;border-radius:50%;background:#ffffff44;transform:translate(-50%,-50%)}
+@media(pointer:coarse){#touch{display:block}}
+</style>
+</head>
+<body>
+<div id="wrap"><div id="frame">
+<canvas id="cv" width="960" height="540"></canvas>
+<div id="touch">
+<div id="joy"><div id="stick"></div></div>
+<div class="tbtn" id="bAtk" style="right:18px;bottom:96px">ATK</div>
+<div class="tbtn" id="bMag" style="right:88px;bottom:40px">MAG</div>
+<div class="tbtn" id="bPot" style="right:18px;bottom:18px">POT</div>
+<div class="tbtn" id="bInt" style="right:96px;bottom:110px">E</div>
+</div>
+</div></div>
+<script>
+"use strict";
+/* ============================================================
+AETHERIA REBORN: THE OTHERWORLD CONTRACT
+Isekai 2D top-down action RPG — built 100% from user's CraftPix packs
+Hero: Yuna (schoolgirl summoned by Truck-kun) | Goddess Aqua | Grom
+3 realms: Slime Plains / Forgotten Catacombs / Shadow Sanctuary
+============================================================ */
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+ctx.imageSmoothingEnabled=false;
+const W=960,H=540;
+function fit(){const s=Math.min(innerWidth/W,innerHeight/H)*0.96;cv.style.width=(W*s)+'px';cv.style.height=(H*s)+'px';}
+addEventListener('resize',fit);fit();
+
+/* ---------- ASSET LOADER (real user packs, graceful fallback) ---------- */
+function loadImg(url){return new Promise(res=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=url;});}
+async function firstOf(list){for(const u of list){const im=await loadImg(u);if(im&&im.width>4)return im;}return null;}
+function stripInfo(img){if(!img)return{frameCount:1,fw:32,fh:32};const h=img.height,w=img.width;let n=Math.max(1,Math.round(w/Math.max(1,h)));if(n>12)n=Math.round(w/32);n=Math.min(12,Math.max(1,n));return{frameCount:n,fw:w/n,fh:h};}
+class Spr{constructor(img){this.img=img;const s=stripInfo(img);this.n=s.frameCount;this.fw=s.fw;this.fh=s.fh;}
+draw(c,sx,sy,dw,dh,frame,flip){frame=((frame|0)%this.n+this.n)%this.n;if(!this.img){c.fillStyle='#f0f';c.fillRect(sx-dw/2,sy-dh,dw,dh);return;}c.save();c.translate(Math.round(sx),Math.round(sy));if(flip)c.scale(-1,1);c.drawImage(this.img,frame*this.fw,0,this.fw,this.fh,-dw/2,-dh,dw,dh);c.restore();}}
+const A={};
+async function loadAssets(){
+const g=(p)=>'assets/'+p;
+A.yunaIdle=new Spr(await firstOf([g('schoolgirl/Girl_2/Idle.png'),g('hero/1/Idle.png')]));
+A.yunaWalk=new Spr(await firstOf([g('schoolgirl/Girl_2/Walk.png'),g('hero/1/Walk.png'),g('hero/1/Run.png')]));
+A.yunaAtk=new Spr(await firstOf([g('schoolgirl/Girl_2/Attack.png'),g('hero/1/Attack1.png'),g('hero/1/Attack2.png')]));
+A.yunaHurt=new Spr(await firstOf([g('hero/1/Hurt.png'),g('schoolgirl/Girl_2/Protection.png')]));
+A.slimeB=new Spr(await firstOf([g('slime/Blue_Slime/Idle.png')]));A.slimeBWalk=new Spr(await firstOf([g('slime/Blue_Slime/walk.png'),g('slime/Blue_Slime/Run.png'),g('slime/Blue_Slime/Idle.png')]));
+A.slimeBAtk=new Spr(await firstOf([g('slime/Blue_Slime/Attack_1.png'),g('slime/Blue_Slime/Idle.png')]));A.slimeBHurt=new Spr(await firstOf([g('slime/Blue_Slime/Hurt.png')]));A.slimeBDead=new Spr(await firstOf([g('slime/Blue_Slime/Dead.png')]));
+A.slimeR=new Spr(await firstOf([g('slime/Red_Slime/Idle.png')]));A.slimeRWalk=new Spr(await firstOf([g('slime/Red_Slime/Walk.png'),g('slime/Red_Slime/Run.png')]));A.slimeRAtk=new Spr(await firstOf([g('slime/Red_Slime/Attack_1.png')]));A.slimeRDead=new Spr(await firstOf([g('slime/Red_Slime/Dead.png')]));
+A.slimeG=new Spr(await firstOf([g('slime/Green_Slime/Idle.png'),g('slime/Blue_Slime/Idle.png')]));
+A.ghost=new Spr(await firstOf([g('ghost/Onre/Idle.png')]));A.ghostFly=new Spr(await firstOf([g('ghost/Onre/Flight.png'),g('ghost/Onre/Walk.png')]));A.ghostAtk=new Spr(await firstOf([g('ghost/Onre/Attack_2.png')]));A.ghostDead=new Spr(await firstOf([g('ghost/Onre/Dead.png')]));
+A.mino=new Spr(await firstOf([g('minotaur/Minotaur_1/Idle.png')]));A.minoWalk=new Spr(await firstOf([g('minotaur/Minotaur_1/Walk.png')]));A.minoAtk=new Spr(await firstOf([g('minotaur/Minotaur_1/Attack.png')]));A.minoDead=new Spr(await firstOf([g('minotaur/Minotaur_1/Dead.png')]));
+A.tengu=new Spr(await firstOf([g('yokai/Karasu_tengu/Idle.png')]));A.tenguWalk=new Spr(await firstOf([g('yokai/Karasu_tengu/Walk.png')]));A.tenguAtk=new Spr(await firstOf([g('yokai/Karasu_tengu/Attack_2.png')]));A.tenguDead=new Spr(await firstOf([g('yokai/Karasu_tengu/Dead.png')]));
+A.vamp=new Spr(await firstOf([g('vampire/Countess_Vampire/Idle.png')]));A.vampWalk=new Spr(await firstOf([g('vampire/Countess_Vampire/Walk.png'),g('vampire/Countess_Vampire/Run.png')]));A.vampAtk=new Spr(await firstOf([g('vampire/Countess_Vampire/Attack_1.png')]));A.vampDead=new Spr(await firstOf([g('vampire/Countess_Vampire/Dead.png')]));
+A.lizard=new Spr(await firstOf([g('monsters/PNG/lizard/Walk1.png'),g('monsters/PNG/medusa/Walk1.png')]));
+A.medusa=new Spr(await firstOf([g('monsters/PNG/medusa/Walk1.png')]));
+A.dragon=new Spr(await firstOf([g('monsters/PNG/small_dragon/Walk1.png'),g('monsters/PNG/dragon/Walk1.png')]));
+A.bossIdle=new Spr(await firstOf([g('boss4dir/Viking Leader/PNG/PNG Sequences/Front - Idle/Front - Idle_000.png'),g('demon/PNG/Demon_warriors_faces_transperent/Character1_face1.png')]));
+A.bgPlains=await firstOf([g('battleground/PNG/Battleground4/Bright/Battleground4.png'),g('backgrounds/7/2304x1296.png')]);
+A.bgForest=await firstOf([g('backgrounds/7/2304x1296.png'),g('backgrounds/6/2304x1296.png')]);
+A.bgDark=await firstOf([g('battleground/PNG/Battleground4/Pale/Battleground4.png')]);
+A.tree=await firstOf([g('forest/PNG/Assets_no_shadow/Mega_tree1.png'),g('forest/PNG/Assets_no_shadow/White_tree1.png')]);
+A.tree2=await firstOf([g('forest/PNG/Assets_no_shadow/Curved_tree2.png'),g('forest/PNG/Assets_no_shadow/Light_balls_tree2.png')]);
+A.avAqua=await firstOf([g('elfqueen/Queen/Talk.png'),g('elfqueen/Queen/Smile.png')]);
+A.avGrom=await firstOf([g('npcavatars/NPC_1/Talk.png'),g('npcavatars/NPC_1/Smile.png')]);
+A.avVaelen=await firstOf([g('elfqueen/Queen/Aggression.png'),g('npcavatars/NPC_1/Aggression.png')]);
+A.avYuna=await firstOf([g('schoolgirl/Girl_2/Dialogue.png'),g('schoolgirl/Girl_2/Idle.png')]);
+A.slashFrames=[];for(let i=1;i<=8;i++){const im=await loadImg(g('slash/PNG/9/'+i+'.png'));if(im)A.slashFrames.push(im);}
+A.magicFrames=[];for(let i=1;i<=8;i++){const im=await loadImg(g('magic/Water Ball/PNG/Water Ball_Frame_0'+i+'.png'));if(im)A.magicFrames.push(im);}
+A.iconPotion=await firstOf([g('icons/PNG/Separately/Icon10_1.png')]);
+}
+
+/* ---------- AUDIO (procedural WebAudio, no files needed) ---------- */
+let AC=null,muted=false,bgmTimer=null,bgmStep=0;
+function ac(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+function tone(f,d,type,v,slide){if(muted)return;const c=ac();if(!c)return;const o=c.createOscillator(),g=c.createGain();o.type=type||'square';o.frequency.setValueAtTime(f,c.currentTime);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,slide),c.currentTime+d);g.gain.setValueAtTime(v||.12,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+d);}
+function noise(d,v){if(muted)return;const c=ac();if(!c)return;const b=c.createBuffer(1,c.sampleRate*d,c.sampleRate),ch=b.getChannelData(0);for(let i=0;i<ch.length;i++)ch[i]=(Math.random()*2-1)*(1-i/ch.length);const s=c.createBufferSource(),g=c.createGain();s.buffer=b;g.gain.value=v||.15;s.connect(g).connect(c.destination);s.start();}
+const SFX={slash(){noise(.12,.2);tone(700,.1,'sawtooth',.08,200);},hit(){tone(180,.15,'square',.15,60);noise(.1,.12);},coin(){tone(900,.08,'square',.1);setTimeout(()=>tone(1350,.12,'square',.1),70);},potion(){tone(400,.2,'sine',.15,900);},levelup(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.18,'square',.12),i*110));},magic(){tone(300,.3,'sawtooth',.1,1200);},roar(){tone(90,.6,'sawtooth',.2,40);noise(.5,.2);},portal(){tone(500,.5,'sine',.12,1500);},talk(){tone(600,.05,'square',.05);},die(){tone(300,.4,'square',.12,50);}};
+function startBGM(){stopBGM();const bass=[110,110,130.8,98];bgmTimer=setInterval(()=>{if(muted||screen!=='play')return;const c=ac();if(!c)return;const b=bass[(bgmStep>>2)%4];if(bgmStep%2===0)tone(b,.22,'triangle',.06);const mel=[440,523,587,659,784,659,587,523];if(bgmStep%4===0)tone(mel[(bgmStep>>2)%8],.3,'square',.03);bgmStep++;},240);}
+function stopBGM(){if(bgmTimer)clearInterval(bgmTimer);bgmTimer=null;}
+
+/* ---------- INPUT ---------- */
+const keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if([' ','arrowup','arrowdown','arrowleft','arrowright'].includes(e.key.toLowerCase()))e.preventDefault();onKey(e.key.toLowerCase());});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+let joyVec={x:0,y:0};const joy=document.getElementById('joy'),stick=document.getElementById('stick');let joyId=null;
+function joyPos(t){const r=joy.getBoundingClientRect();let dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2);const m=Math.hypot(dx,dy),mx=r.width/2;if(m>mx){dx*=mx/m;dy*=mx/m;}stick.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;joyVec={x:dx/mx,y:dy/mx};}
+joy.addEventListener('touchstart',e=>{joyId=e.changedTouches[0].identifier;joyPos(e.changedTouches[0]);e.preventDefault();},{passive:false});
+addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===joyId)joyPos(t);},{passive:false});
+addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joyId){joyId=null;joyVec={x:0,y:0};stick.style.transform='translate(-50%,-50%)';}});
+function bindBtn(id,fn){const el=document.getElementById(id);el.addEventListener('touchstart',e=>{e.preventDefault();fn();},{passive:false});el.addEventListener('mousedown',e=>{e.preventDefault();fn();});}
+bindBtn('bAtk',()=>doAttack());bindBtn('bMag',()=>doMagic());bindBtn('bPot',()=>doPotion());bindBtn('bInt',()=>doInteract());
+cv.addEventListener('mousedown',()=>{ac();if(screen==='title')startGame();else if(dlg.active)nextDlg();else if(screen==='play')doAttack();});
+
+/* ---------- GAME STATE ---------- */
+let screen='title',assetsReady=false;
+let level=0,shake=0,flashT=0,time=0;
+const LEVELS=[
+{name:'I. SLIME PLAINS',sub:'Tutorial Meadows — Guild Rank F',sky:'#7ec8f7',ground:'#5da24a',ground2:'#4c8a3e',dark:false},
+{name:'II. FORGOTTEN CATACOMBS',sub:'Minotaur King sleeps below…',sky:'#1a1030',ground:'#3d3355',ground2:'#322a48',dark:true},
+{name:'III. SHADOW SANCTUARY',sub:'Demon Lord Vaelen awaits',sky:'#2b0a2e',ground:'#4a1f3d',ground2:'#3a1830',dark:true}];
+const player={x:400,y:400,hp:100,maxhp:100,mp:60,maxmp:60,st:100,maxst:100,xp:0,level:1,gold:20,potions:3,atk:12,dir:1,moving:false,atkT:0,atkCD:0,magCD:0,dashCD:0,dashT:0,inv:0,anim:0,kills:0,fragments:0,weapon:'Iron Sword'};
+let enemies=[],npcs=[],parts=[],projs=[],pickups=[],floaters=[],portals=[],props=[];
+let quest={idx:0,kills:0,need:8,fragGot:false};
+let dlg={active:false,lines:[],i:0,chars:0};
+let boss=null,levelMsg='',levelMsgT=0,transT=0,vicChoice=0;
+
+const ENEMY_DEF={
+slimeB:{hp:30,atk:7,xp:20,gold:8,spd:55,detect:200,arange:34,name:'Blue Slime',scale:1.6},
+slimeR:{hp:48,atk:10,xp:32,gold:13,spd:65,detect:220,arange:36,name:'Red Slime',scale:1.7},
+slimeG:{hp:38,atk:8,xp:26,gold:10,spd:60,detect:210,arange:34,name:'Green Slime',scale:1.6},
+ghost:{hp:65,atk:13,xp:48,gold:20,spd:85,detect:280,arange:44,name:'Onre Wraith',scale:2.0},
+medusa:{hp:75,atk:14,xp:55,gold:24,spd:70,detect:250,arange:46,name:'Medusa',scale:2.0},
+lizard:{hp:85,atk:15,xp:60,gold:26,spd:80,detect:260,arange:48,name:'Lizard Brute',scale:2.1},
+mino:{hp:260,atk:22,xp:300,gold:150,spd:70,detect:400,arange:70,name:'MINOTAUR KING',scale:3.2,boss:true},
+tengu:{hp:85,atk:16,xp:65,gold:28,spd:110,detect:300,arange:50,name:'Karasu Tengu',scale:2.1},
+vamp:{hp:130,atk:20,xp:110,gold:55,spd:95,detect:320,arange:56,name:'Vampire Noble',scale:2.3},
+dragon:{hp:150,atk:22,xp:130,gold:70,spd:85,detect:340,arange:60,name:'Shadow Dragon',scale:2.6},
+vaelen:{hp:650,atk:26,xp:1000,gold:1000,spd:90,detect:999,arange:80,name:'DEMON LORD VAELEN',scale:3.6,boss:true}};
+
+function sprFor(type,state){
+if(type.startsWith('slimeB'))return state==='atk'?A.slimeBAtk:state==='hurt'?A.slimeBHurt:state==='dead'?A.slimeBDead:(state==='walk'?A.slimeBWalk:A.slimeB);
+if(type.startsWith('slimeR'))return state==='atk'?A.slimeRAtk:state==='dead'?A.slimeRDead:(state==='walk'?A.slimeRWalk:A.slimeR);
+if(type.startsWith('slimeG'))return state==='atk'?A.slimeBAtk:state==='dead'?A.slimeBDead:(state==='walk'?A.slimeBWalk:A.slimeG);
+if(type==='ghost')return state==='atk'?A.ghostAtk:state==='dead'?A.ghostDead:(state==='walk'?A.ghostFly:A.ghost);
+if(type==='mino')return state==='atk'?A.minoAtk:state==='dead'?A.minoDead:(state==='walk'?A.minoWalk:A.mino);
+if(type==='tengu')return state==='atk'?A.tenguAtk:state==='dead'?A.tenguDead:(state==='walk'?A.tenguWalk:A.tengu);
+if(type==='vamp')return state==='atk'?A.vampAtk:state==='dead'?A.vampDead:(state==='walk'?A.vampWalk:A.vamp);
+if(type==='vaelen')return state==='walk'?A.yunaWalk:A.bossIdle;
+return A.medusa;
+}
+function spawnEnemy(type,x,y){const d=ENEMY_DEF[type];enemies.push({type,x,y,hp:d.hp,maxhp:d.hp,atk:d.atk,xp:d.xp,gold:d.gold,spd:d.spd,detect:d.detect,arange:d.arange,name:d.name,scale:d.scale,boss:!!d.boss,state:'idle',anim:Math.random()*5,atkCD:0,hurtT:0,deadT:0,dead:false,wx:x,wy:y,wt:0,phase:1});if(d.boss)boss=enemies[enemies.length-1];}
+function buildLevel(li){
+enemies=[];npcs=[];projs=[];pickups=[];portals=[];props=[];boss=null;parts=[];
+const R=(a,b)=>a+Math.random()*(b-a);
+if(li===0){
+for(let i=0;i<5;i++)spawnEnemy('slimeB',R(500,2000),R(300,1200));
+for(let i=0;i<3;i++)spawnEnemy('slimeR',R(800,2200),R(300,1200));
+for(let i=0;i<2;i++)spawnEnemy('slimeG',R(600,2100),R(400,1100));
+npcs.push({x:420,y:330,name:'Goddess Aqua',av:'aqua',color:'#5ff',lines:[
+['AQUA','YUNA! Truck-kun delivered you safely. This is AETHERIA — and you are my chosen heroine!'],
+['YUNA','W-where…? My school uniform… is that a health bar?! Am I in a game?!'],
+['AQUA','Better. An ISEKAI! The Demon Lord VAELEN shattered the Shadow Relic into 3 fragments. Sign my contract: defeat 8 SLIMES and take the Verdant Fragment!'],
+['YUNA','Slimes?! They look squishy… but fine! For a second life, I fight!']],done:false});
+npcs.push({x:620,y:360,name:'Grom (Guild)',av:'grom',color:'#fc6',lines:[['GROM','Guild rule #1: J / SPACE to slash, K for Aqua Magic, Q to chug potions. Bring glory, kid!']],done:false});
+quest={idx:0,kills:0,need:8,fragGot:false};
+for(let i=0;i<40;i++)props.push({x:R(0,2400),y:R(0,1500),k:Math.random()<.6?0:1,s:R(.7,1.4)});
+}else if(li===1){
+for(let i=0;i<4;i++)spawnEnemy('ghost',R(500,2000),R(300,1200));
+for(let i=0;i<3;i++)spawnEnemy('medusa',R(700,2100),R(300,1200));
+for(let i=0;i<2;i++)spawnEnemy('lizard',R(600,2000),R(400,1100));
+spawnEnemy('mino',1800,700);
+npcs.push({x:420,y:330,name:'Grom (Guild)',av:'grom',color:'#fc6',lines:[
+['GROM','You survived the Plains?! The CATACOMBS crawl with wraiths. The MINOTAUR KING holds the Ember Fragment — dodge his charge, strike after he swings!'],
+['YUNA','A minotaur… in a dungeon… This is just like my manga! Let\'s go!']],done:false});
+quest={idx:1,kills:0,need:6,fragGot:false};
+for(let i=0;i<30;i++)props.push({x:R(0,2400),y:R(0,1500),k:2,s:R(.7,1.3)});
+}else{
+for(let i=0;i<4;i++)spawnEnemy('tengu',R(500,2000),R(300,1200));
+for(let i=0;i<2;i++)spawnEnemy('vamp',R(800,2100),R(300,1200));
+spawnEnemy('dragon',1500,500);spawnEnemy('vaelen',1850,750);
+npcs.push({x:420,y:330,name:'Goddess Aqua',av:'aqua',color:'#5ff',lines:[
+['AQUA','Final realm, Yuna. VAELEN was my FIRST hero — betrayed a century ago. He wields the Umbral Fragment. End this… please.'],
+['VAELEN','Little summoned one… Aqua abandons every hero when worship fades. Join me — or be UNMADE!'],
+['YUNA','You were lonely, not evil! But I won\'t let you chain this world. Enchant my blade, Aqua — MAXIMUM ISEKAI POWER!']],done:false});
+quest={idx:2,kills:0,need:3,fragGot:false};
+for(let i=0;i<30;i++)props.push({x:R(0,2400),y:R(0,1500),k:Math.random()<.5?2:1,s:R(.7,1.4)});
+}
+player.x=380;player.y=480;
+levelMsg=LEVELS[li].name;levelMsgT=3;
+}
+function startDlg(lines){dlg={active:true,lines,i:0,chars:0};SFX.talk();}
+function nextDlg(){const L=dlg.lines[dlg.i];if(dlg.chars<L[1].length){dlg.chars=L[1].length;return;}SFX.talk();dlg.i++;dlg.chars=0;if(dlg.i>=dlg.lines.length){dlg.active=false;const n=nearNPC();if(n)n.done=true;}}
+function nearNPC(){for(const n of npcs)if(Math.hypot(n.x-player.x,n.y-player.y)<90)return n;return null;}
+function nearPortal(){for(const p of portals)if(Math.hypot(p.x-player.x,p.y-player.y)<60)return p;return null;}
+
+/* ---------- ACTIONS ---------- */
+function doAttack(){if(screen!=='play'||dlg.active||player.atkCD>0||player.st<8)return;player.atkCD=.38;player.atkT=.22;player.st-=8;SFX.slash();const range=86,dmg=player.atk+Math.floor(player.level*2)+(player.weapon==='Steel Katana'?6:player.weapon==='Aqua Blessed Blade'?14:0);
+for(const e of enemies){if(e.dead)continue;const dx=e.x-player.x,dy=e.y-player.y,d=Math.hypot(dx,dy);if(d<range+20*e.scale){const ang=Math.atan2(dy,dx),fa=player.dir===1?0:Math.PI;let da=Math.abs(ang-fa);if(da>Math.PI)da=2*Math.PI-da;if(da<1.2||d<50){hurtEnemy(e,dmg,dx,dy);}}}
+for(let i=0;i<8;i++)parts.push({x:player.x+(player.dir*40),y:player.y-20,vx:player.dir*(100+Math.random()*200),vy:(Math.random()-.5)*200,life:.3,max:.3,c:'#ffe66d',s:3});}
+function doMagic(){if(screen!=='play'||dlg.active||player.magCD>0||player.mp<15)return;player.mp-=15;player.magCD=.7;SFX.magic();const a=player.dir===1?0:Math.PI;projs.push({x:player.x,y:player.y-24,vx:Math.cos(a)*420,vy:0,life:1.2,dmg:player.atk+10+player.level*2,friendly:true,anim:0});for(let i=0;i<10;i++)parts.push({x:player.x,y:player.y-24,vx:(Math.random()-.5)*200,vy:(Math.random()-.5)*200,life:.4,max:.4,c:'#3a86ff',s:3});}
+function doPotion(){if(screen!=='play'||player.potions<=0||player.hp>=player.maxhp)return;player.potions--;player.hp=Math.min(player.maxhp,player.hp+45);SFX.potion();floaters.push({x:player.x,y:player.y-70,t:'+45 HP',c:'#5f5',life:1.2});for(let i=0;i<12;i++)parts.push({x:player.x,y:player.y-20,vx:(Math.random()-.5)*150,vy:-Math.random()*150,life:.6,max:.6,c:'#5f5',s:3});}
+function doInteract(){if(screen!=='play')return;if(dlg.active){nextDlg();return;}const n=nearNPC();if(n){startDlg(n.lines);return;}const p=nearPortal();if(p){SFX.portal();transT=1.2;screen='trans';}}
+function hurtEnemy(e,dmg,dx,dy){if(e.dead)return;e.hp-=dmg;e.hurtT=.25;e.state='hurt';const m=Math.hypot(dx,dy)||1;e.x+=dx/m*14;e.y+=dy/m*14;shake=Math.min(8,shake+2);SFX.hit();floaters.push({x:e.x,y:e.y-50*e.scale,t:'-'+dmg,c:'#ff6',life:.8});for(let i=0;i<8;i++)parts.push({x:e.x,y:e.y-24,vx:(Math.random()-.5)*260,vy:(Math.random()-.5)*260,life:.35,max:.35,c:'#fff',s:3});
+if(e.hp<=0){e.dead=true;e.deadT=0;SFX.die();player.kills++;quest.kills++;player.xp+=e.xp;player.gold+=e.gold;SFX.coin();floaters.push({x:e.x,y:e.y-80,t:'+'+e.xp+' XP  +'+e.gold+'G',c:'#fd6',life:1.4});
+pickups.push({x:e.x+R(-20,20),y:e.y+R(-10,10),k:'gold',v:e.gold,t:0});if(Math.random()<.3)pickups.push({x:e.x+R(-20,20),y:e.y,t:0,k:'heart',v:20});
+if(e.boss){shake=12;SFX.roar();for(let i=0;i<40;i++)parts.push({x:e.x,y:e.y-30,vx:(Math.random()-.5)*400,vy:(Math.random()-.5)*400,life:.8,max:.8,c:i%2?'#fb5607':'#ffe66d',s:4});
+if(e.type==='mino'){pickups.push({x:e.x,y:e.y-20,k:'relic',v:2,t:0});floaters.push({x:e.x,y:e.y-120,t:'EMBER FRAGMENT!',c:'#fb5607',life:2});}
+if(e.type==='vaelen'){pickups.push({x:e.x,y:e.y-20,k:'relic',v:3,t:0});}
+if(level===0&&quest.kills>=quest.need&&!quest.fragGot){pickups.push({x:e.x,y:e.y-30,k:'relic',v:1,t:0});}
+while(player.xp>=player.level*100){player.xp-=player.level*100;player.level++;player.maxhp+=15;player.hp=player.maxhp;player.atk+=3;player.maxmp+=10;player.mp=player.maxmp;SFX.levelup();floaters.push({x:player.x,y:player.y-90,t:'LEVEL UP! Lv'+player.level,c:'#ff0',life:2});}
+if(level===1&&e.type!=='mino'){const c=quest.kills;if(c>=quest.need){/* mino already spawned */}}
+}}}
+function R(a,b){return a+Math.random()*(b-a);}
+function onKey(k){if(screen==='title'&&(k==='enter'||k===' ')){startGame();return;}
+if(screen==='over'&&k==='enter'){resetAll();return;}
+if(screen==='win'&&(k==='arrowleft'||k==='a'))vicChoice=0;if(screen==='win'&&(k==='arrowright'||k==='d'))vicChoice=1;
+if(screen==='win'&&k==='enter'){resetAll();return;}
+if(k==='m'){muted=!muted;floaters.push({x:player.x,y:player.y-70,t:muted?'MUTED':'SOUND ON',c:'#fff',life:1});}
+if(screen!=='play')return;
+if(k==='e')doInteract();if(k==='j'||k==='z'||k===' ')doAttack();if(k==='k'||k==='x')doMagic();if(k==='q')doPotion();}
+function startGame(){ac();screen='play';level=0;resetPlayer();buildLevel(0);startBGM();startDlg([['AQUA','YUNA… wake up, lost soul. Truck-kun has delivered you to AETHERIA!'],['YUNA','Gaaah! A goddess?! And why is there a SLIME wobbling at me?!'],['AQUA','Sign the Otherworld Contract: clear the plains, earn Guild Rank F, and claim your destiny! WASD to move — J to slash!']]);}
+function resetPlayer(){Object.assign(player,{hp:100,maxhp:100,mp:60,maxmp:60,st:100,xp:0,level:1,gold:20,potions:3,atk:12,kills:0,fragments:0,weapon:'Iron Sword'});}
+function resetAll(){screen='title';level=0;}
+
+/* ---------- UPDATE ---------- */
+let cam={x:0,y:0};
+function update(dt){
+time+=dt;
+if(levelMsgT>0)levelMsgT-=dt;
+if(shake>0)shake-=dt*20;
+if(flashT>0)flashT-=dt;
+if(screen==='trans'){transT-=dt;if(transT<=0){level++;if(level>2){screen='win';stopBGM();SFX.levelup();}else{buildLevel(level);screen='play';if(level===1){player.weapon='Steel Katana';player.atk+=4;startDlg([['GROM','The Ember Fragment… the Catacombs gate is OPEN. Take this Steel Katana — you\'ll need it.']]);}if(level===2){player.weapon='Aqua Blessed Blade';player.atk+=8;player.potions+=2;}}}return;}
+if(screen!=='play')return;
+if(dlg.active){if(dlg.chars<dlg.lines[dlg.i][1].length)dlg.chars+=dt*45;return;}
+// movement
+let mx=0,my=0;
+if(keys['w']||keys['arrowup'])my-=1;if(keys['s']||keys['arrowdown'])my+=1;if(keys['a']||keys['arrowleft'])mx-=1;if(keys['d']||keys['arrowright'])mx+=1;
+mx+=joyVec.x;my+=joyVec.y;const ml=Math.hypot(mx,my);if(ml>1){mx/=ml;my/=ml;}
+player.moving=ml>.15;
+if(mx!==0)player.dir=mx>0?1:-1;
+const dash=(keys['shift']||keys['l'])&&player.dashCD<=0&&player.st>20&&player.moving;
+let spd=200*(dash?2.1:1);
+if(player.dashT>0){player.dashT-=dt;}
+if(dash){player.dashT=.18;player.dashCD=.9;player.st-=20;player.inv=Math.max(player.inv,.25);for(let i=0;i<8;i++)parts.push({x:player.x,y:player.y-20,vx:-mx*200+R(-50,50),vy:R(-80,80),life:.3,max:.3,c:'#9ff',s:3});}
+player.x=Math.max(30,Math.min(2370,player.x+mx*spd*dt));player.y=Math.max(60,Math.min(1470,player.y+my*spd*dt));
+if(player.moving)player.anim+=dt*10;else player.anim+=dt*4;
+player.st=Math.min(player.maxst,player.st+dt*14);player.mp=Math.min(player.maxmp,player.mp+dt*6);
+if(player.atkCD>0)player.atkCD-=dt;if(player.atkT>0)player.atkT-=dt;if(player.magCD>0)player.magCD-=dt;if(player.dashCD>0)player.dashCD-=dt;if(player.inv>0)player.inv-=dt;
+// camera
+cam.x+=((player.x-W/2)-cam.x)*Math.min(1,dt*5);cam.y+=((player.y-H/2)-cam.y)*Math.min(1,dt*5);
+cam.x=Math.max(0,Math.min(2400-W,cam.x));cam.y=Math.max(0,Math.min(1500-H,cam.y));
+// enemies AI (patrol/chase/attack — mirrors Godot behavior trees)
+for(const e of enemies){
+if(e.dead){e.deadT+=dt;continue;}
+e.anim+=dt*(e.state==='atk'?10:6);if(e.hurtT>0)e.hurtT-=dt;
+const dx=player.x-e.x,dy=player.y-e.y,d=Math.hypot(dx,dy);
+if(e.atkCD>0)e.atkCD-=dt;
+if(e.type==='vaelen'&&e.hp<e.maxhp*.66&&e.phase===1){e.phase=2;e.spd=120;e.atk+=4;SFX.roar();floaters.push({x:e.x,y:e.y-120,t:'VAELEN: PHASE 2 — HOLLOW FLAMES!',c:'#f0f',life:2});shake=10;}
+if(e.type==='vaelen'&&e.hp<e.maxhp*.33&&e.phase===2){e.phase=3;e.spd=150;e.atk+=5;SFX.roar();floaters.push({x:e.x,y:e.y-120,t:'VAELEN: FINAL PHASE!',c:'#f00',life:2});shake=12;}
+if(d<e.detect&&d>e.arange){e.state='walk';e.x+=dx/d*e.spd*dt;e.y+=dy/d*e.spd*dt;}
+else if(d<=e.arange){e.state='atk';if(e.atkCD<=0){e.atkCD=e.boss?.9:1.2;player.hp-=Math.max(1,e.atk-Math.floor(player.level*.8));player.inv=.3;flashT=.25;shake=Math.min(9,shake+3);SFX.hit();floaters.push({x:player.x,y:player.y-70,t:'-'+Math.max(1,e.atk-Math.floor(player.level*.8)),c:'#f66',life:.8});
+if(e.type==='vaelen'&&e.phase>=2){for(let k=0;k<3;k++){const a=Math.atan2(dy,dx)+(k-1)*.4;projs.push({x:e.x,y:e.y-40,vx:Math.cos(a)*260,vy:Math.sin(a)*260,life:1.5,dmg:e.atk-6,friendly:false,anim:0});}}
+if(player.hp<=0){player.hp=0;screen='over';stopBGM();SFX.die();}}}
+else{e.state='idle';e.wt-=dt;if(e.wt<=0){e.wt=R(1,3);const a=R(0,Math.PI*2);e.wx=e.x+Math.cos(a)*120;e.wy=e.y+Math.sin(a)*120;}const px=e.wx-e.x,py=e.wy-e.y,pd=Math.hypot(px,py);if(pd>10){e.x+=px/pd*e.spd*.4*dt;e.y+=py/pd*e.spd*.4*dt;e.state='walk';}}
+}
+// projectiles
+for(let i=projs.length-1;i>=0;i--){const p=projs[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt;p.anim+=dt*12;
+if(p.friendly){for(const e of enemies){if(e.dead)continue;if(Math.hypot(e.x-p.x,(e.y-30)-p.y)<34*e.scale*.6+14){hurtEnemy(e,p.dmg,p.vx,0);p.life=0;break;}}}
+else{if(Math.hypot(player.x-p.x,(player.y-24)-p.y)<26&&player.inv<=0){player.hp-=p.dmg;player.inv=.4;flashT=.25;SFX.hit();floaters.push({x:player.x,y:player.y-70,t:'-'+p.dmg,c:'#f66',life:.8});p.life=0;if(player.hp<=0){player.hp=0;screen='over';stopBGM();}}}
+parts.push({x:p.x,y:p.y,vx:R(-40,40),vy:R(-40,40),life:.25,max:.25,c:p.friendly?'#3a86ff':'#c0f',s:2});
+if(p.life<=0)projs.splice(i,1);}
+// pickups
+for(let i=pickups.length-1;i>=0;i--){const p=pickups[i];p.t+=dt;if(Math.hypot(p.x-player.x,p.y-player.y)<44){if(p.k==='gold'){player.gold+=0;SFX.coin();}else if(p.k==='heart'){player.hp=Math.min(player.maxhp,player.hp+p.v);floaters.push({x:player.x,y:player.y-70,t:'+'+p.v+' HP',c:'#5f5',life:1});SFX.potion();}else if(p.k==='relic'){player.fragments++;quest.fragGot=true;SFX.levelup();SFX.portal();floaters.push({x:player.x,y:player.y-90,t:'✦ RELIC FRAGMENT '+p.v+'/3 ✦',c:'#ffe66d',life:2.5});portals.push({x:2000,y:400});levelMsg='A PORTAL HAS OPENED — HEAD EAST! ➤';levelMsgT=4;}else if(p.k==='potion'){player.potions++;floaters.push({x:player.x,y:player.y-70,t:'+1 POTION',c:'#f9f',life:1});SFX.coin();}
+pickups.splice(i,1);}}
+// quest auto-portal for level 0 handled via relic; level1 mino drops relic; level2 vaelen drops
+if(level===0&&quest.kills>=quest.need&&!quest.fragGot&&!pickups.some(p=>p.k==='relic')&&!portals.length){
+// fragment guardian: spawn glowing cache near center
+if(!enemies.some(e=>!e.dead)){pickups.push({x:1200,y:700,k:'relic',v:1,t:0});}
+}
+// particles/floaters
+for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.94;p.vy*=.94;p.life-=dt;if(p.life<=0)parts.splice(i,1);}
+for(let i=floaters.length-1;i>=0;i--){const f=floaters[i];f.y-=30*dt;f.life-=dt;if(f.life<=0)floaters.splice(i,1);}
+}
+
+/* ---------- RENDER ---------- */
+function drawBar(x,y,w,h,frac,c1,c2){ctx.fillStyle='#000a';ctx.fillRect(x-1,y-1,w+2,h+2);ctx.fillStyle='#222';ctx.fillRect(x,y,w,h);ctx.fillStyle=frac>.5?c1:(frac>.25?'#fa0':'#f33');if(frac>0)ctx.fillRect(x,y,w*Math.max(0,Math.min(1,frac)),h);ctx.strokeStyle=c2;ctx.lineWidth=1;ctx.strokeRect(x-.5,y-.5,w+1,h+1);}
+function drawAvatar(img,x,y,s){if(img){try{ctx.drawImage(img,0,0,img.width,img.height,x,y,s,s);}catch(e){ctx.fillStyle='#f0f';ctx.fillRect(x,y,s,s);}}else{ctx.fillStyle='#f0f';ctx.fillRect(x,y,s,s);}}
+function render(){
+ctx.save();
+if(shake>0)ctx.translate(R(-shake,shake),R(-shake,shake));
+const L=LEVELS[Math.min(level,2)];
+// sky + ground
+ctx.fillStyle=L.sky;ctx.fillRect(-20,-20,W+40,H+40);
+const bg=A.level===undefined?null:null;
+const bgImg=level===0?(A.bgPlains||A.bgForest):(level===1?A.bgDark:A.bgDark);
+if(bgImg){const pw=960,ph=540;let ox=-(cam.x*.2%pw),oy=-(cam.y*.15%ph);for(let ix=ox-pw;ix<W+pw;ix+=pw)for(let iy=oy-ph;iy<H+ph;iy+=ph)ctx.drawImage(bgImg,ix,iy,pw,ph);}
+ctx.fillStyle=L.ground;ctx.fillRect(0,0,W,H);
+// tile grid
+const ts=48;ctx.globalAlpha=.5;
+for(let gx=Math.floor(cam.x/ts)*ts;gx<cam.x+W+ts;gx+=ts)for(let gy=Math.floor(cam.y/ts)*ts;gy<cam.y+H+ts;gy+=ts){const h=((gx*7+gy*13)%5);ctx.fillStyle=h<2?L.ground:L.ground2;ctx.fillRect(gx-cam.x,gy-cam.y,ts-1,ts-1);}
+ctx.globalAlpha=1;
+// world bounds
+ctx.strokeStyle='#ffffff33';ctx.lineWidth=3;ctx.strokeRect(-cam.x,-cam.y,2400,1500);
+// props (trees / dungeon deco)
+for(const p of props){const sx=p.x-cam.x,sy=p.y-cam.y;if(sx<-80||sx>W+80||sy<-120||sy>H+80)continue;
+if(p.k===0&&A.tree){const w=64*p.s;ctx.drawImage(A.tree,sx-w/2,sy-w,w,w);}
+else if(p.k===1&&A.tree2){const w=56*p.s;ctx.drawImage(A.tree2,sx-w/2,sy-w,w,w);}
+else{ctx.fillStyle=level===0?'#2d6a2d':'#5a4a7a';ctx.fillRect(sx-8,sy-24,16,24);ctx.fillStyle=level===0?'#3f9142':'#6e5b8e';ctx.beginPath();ctx.arc(sx,sy-26,16*p.s,0,7);ctx.fill();}}
+// portals
+for(const p of portals){const sx=p.x-cam.x,sy=p.y-cam.y;const pl=1+Math.sin(time*5)*.1;ctx.save();ctx.translate(sx,sy);ctx.scale(pl,pl);const g=ctx.createRadialGradient(0,-30,5,0,-30,55);g.addColorStop(0,'#fff');g.addColorStop(.4,'#5ff');g.addColorStop(1,'#00f0');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,-30,30,48,0,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 13px monospace';ctx.textAlign='center';ctx.fillText('NEXT ➤',0,40);ctx.restore();}
+// pickups
+for(const p of pickups){const sx=p.x-cam.x,sy=p.y-cam.y+Math.sin(p.t*4)*4;ctx.save();ctx.translate(sx,sy);
+if(p.k==='gold'){ctx.fillStyle='#fc0';ctx.beginPath();ctx.arc(0,0,8,0,7);ctx.fill();ctx.fillStyle='#a60';ctx.font='bold 10px monospace';ctx.textAlign='center';ctx.fillText('G',0,3);}
+else if(p.k==='heart'){ctx.fillStyle='#f35';ctx.font='16px monospace';ctx.textAlign='center';ctx.fillText('♥',0,5);}
+else if(p.k==='potion'){ctx.fillStyle='#f0f';ctx.fillRect(-6,-10,12,16);ctx.fillStyle='#fff';ctx.fillRect(-6,-10,12,4);}
+else if(p.k==='relic'){const gl=ctx.createRadialGradient(0,-6,2,0,-6,26);gl.addColorStop(0,'#fff');gl.addColorStop(.5,'#ffe66d');gl.addColorStop(1,'#f80');ctx.fillStyle=gl;ctx.beginPath();ctx.moveTo(0,-22);ctx.lineTo(12,0);ctx.lineTo(0,10);ctx.lineTo(-12,0);ctx.closePath();ctx.fill();}
+ctx.restore();}
+// npcs
+for(const n of npcs){const sx=n.x-cam.x,sy=n.y-cam.y;ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(sx,sy,20,7,0,0,7);ctx.fill();
+ctx.fillStyle=n.av==='aqua'?'#5ff':n.av==='grom'?'#8a5a2b':'#c0f';ctx.fillRect(sx-14,sy-52,28,40);ctx.fillStyle='#ffe0bd';ctx.fillRect(sx-10,sy-48,20,16);
+ctx.fillStyle='#fff';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText(n.name,sx,sy-58);
+if(!n.done){ctx.fillStyle='#ff0';ctx.font='bold 16px monospace';ctx.fillText('!',sx+18,sy-56+Math.sin(time*4)*3);}
+if(Math.hypot(n.x-player.x,n.y-player.y)<90){ctx.fillStyle='#000a';ctx.fillRect(sx-34,sy-84,68,16);ctx.fillStyle='#fff';ctx.font='10px monospace';ctx.fillText('[E] Talk',sx,sy-72);}}
+// enemies sorted by y
+const sorted=[...enemies].sort((a,b)=>a.y-b.y);
+for(const e of sorted){const sx=e.x-cam.x,sy=e.y-cam.y;if(sx<-120||sx>W+120||sy<-140||sy>H+120)continue;
+if(e.dead){if(e.deadT<.6){ctx.globalAlpha=1-e.deadT/.6;const s=sprFor(e.type,'dead');s.draw(ctx,sx,sy,64*e.scale,64*e.scale,Math.floor(e.deadT*8),false);ctx.globalAlpha=1;}continue;}
+ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(sx,sy,18*e.scale*.6,6,0,0,7);ctx.fill();
+const st=e.state==='atk'?'atk':(e.state==='walk'?'walk':'idle');const spr=sprFor(e.type,st);
+const flash=e.hurtT>0&&Math.floor(time*20)%2===0;
+if(flash){ctx.save();ctx.globalAlpha=.7;}
+const flip=player.x<e.x;
+spr.draw(ctx,sx,sy,64*e.scale,64*e.scale,Math.floor(e.anim),!flip?false:true);
+if(flash)ctx.restore();
+if(e.hp<e.maxhp){drawBar(sx-26,sy-64*e.scale-8,52,6,e.hp/e.maxhp,'#5f5','#000');}
+if(e.boss){ctx.fillStyle='#fff';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText(e.name,sx,sy-64*e.scale-14);}}
+// projectiles
+for(const p of projs){const sx=p.x-cam.x,sy=p.y-cam.y;if(A.magicFrames.length&&p.friendly){const f=A.magicFrames[Math.floor(p.anim)%A.magicFrames.length];ctx.drawImage(f,sx-16,sy-16,32,32);}else{ctx.fillStyle=p.friendly?'#3a86ff':'#c0f';ctx.beginPath();ctx.arc(sx,sy,p.friendly?9:8,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx,sy,4,0,7);ctx.fill();}}
+// player
+{
+const sx=player.x-cam.x,sy=player.y-cam.y;
+ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(sx,sy,18,6,0,0,7);ctx.fill();
+const blink=player.inv>0&&Math.floor(time*16)%2===0;
+if(!blink){
+let spr=A.yunaIdle,st2='idle';
+if(player.atkT>0){spr=A.yunaAtk;st2='atk';}else if(player.moving){spr=A.yunaWalk;st2='walk';}
+spr.draw(ctx,sx,sy,64,64,Math.floor(player.anim),player.dir<0);
+if(player.atkT>0&&A.slashFrames.length){const f=A.slashFrames[Math.floor((0.22-player.atkT)/0.22*7)]||A.slashFrames[0];if(f){ctx.save();ctx.translate(sx+player.dir*44,sy-28);if(player.dir<0)ctx.scale(-1,1);ctx.globalAlpha=.9;ctx.drawImage(f,-24,-24,48,48);ctx.restore();}}
+}
+if(player.dashT>0){ctx.strokeStyle='#9ff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(sx,sy-24,30,0,7);ctx.stroke();}
+}
+// particles
+for(const p of parts){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.c;ctx.fillRect(p.x-cam.x-p.s/2,p.y-cam.y-p.s/2,p.s,p.s);}ctx.globalAlpha=1;
+// damage numbers
+ctx.textAlign='center';
+for(const f of floaters){ctx.globalAlpha=Math.min(1,f.life);ctx.font='bold 14px monospace';ctx.strokeStyle='#000';ctx.lineWidth=3;ctx.strokeText(f.t,f.x-cam.x,f.y-cam.y);ctx.fillStyle=f.c;ctx.fillText(f.t,f.x-cam.x,f.y-cam.y);}ctx.globalAlpha=1;
+ctx.restore();
+// red hurt flash
+if(flashT>0){ctx.fillStyle=`rgba(255,0,0,${flashT*.5})`;ctx.fillRect(0,0,W,H);}
+// ===== HUD =====
+if(screen==='play'||dlg.active){
+// top-left status panel
+ctx.fillStyle='rgba(8,8,24,.78)';ctx.fillRect(8,8,300,108);ctx.strokeStyle='#6c5ce7';ctx.lineWidth=2;ctx.strokeRect(8,8,300,108);
+drawAvatar(A.avYuna,16,16,40);
+ctx.fillStyle='#fff';ctx.font='bold 13px monospace';ctx.textAlign='left';ctx.fillText('YUNA  Lv'+player.level,64,30);
+ctx.font='10px monospace';ctx.fillStyle='#fd6';ctx.fillText('⚔ '+player.weapon+'  💰'+player.gold+'G',64,44);
+ctx.fillStyle='#fff';ctx.font='10px monospace';ctx.fillText('HP',64,58);drawBar(90,50,200,10,player.hp/player.maxhp,'#5f5','#000');
+ctx.fillText('MP',64,74);drawBar(90,66,200,10,player.mp/player.maxmp,'#48f','#000');
+ctx.fillText('ST',64,90);drawBar(90,82,200,10,player.st/player.maxst,'#fd6','#000');
+ctx.fillStyle='#fff';ctx.font='10px monospace';ctx.fillText('XP '+player.xp+'/'+(player.level*100)+'  🧪x'+player.potions+' (Q)  ✦'+player.fragments+'/3',64,106);
+// quest tracker top-right
+const qtxt=level===0?`QUEST: Slime Extermination (${Math.min(quest.kills,quest.need)}/${quest.need})`:level===1?`QUEST: Echoes Below (${quest.kills} kills + Minotaur)`:`QUEST: Demon Lord's Contract — SLAY VAELEN`;
+ctx.fillStyle='rgba(8,8,24,.78)';const qw=ctx.measureText(qtxt).width+120;ctx.fillRect(W-qw-8,8,qw,52);ctx.strokeStyle='#ffe66d';ctx.strokeRect(W-qw-8,8,qw,52);
+ctx.fillStyle='#ffe66d';ctx.font='bold 11px monospace';ctx.textAlign='left';ctx.fillText('✦ '+LEVELS[Math.min(level,2)].name,W-qw+4,26);ctx.fillStyle='#fff';ctx.font='10px monospace';ctx.fillText(qtxt,W-qw+4,42);
+ctx.fillStyle='#9ff';ctx.fillText('Realm '+(level+1)+'/3  Kills:'+player.kills,W-qw+4,54);
+// boss bar
+if(boss&&!boss.dead&&Math.hypot(boss.x-player.x,boss.y-player.y)<600){ctx.fillStyle='rgba(8,8,24,.8)';ctx.fillRect(W/2-220,H-44,440,30);ctx.strokeStyle='#f33';ctx.strokeRect(W/2-220,H-44,440,30);ctx.fillStyle='#fff';ctx.font='bold 11px monospace';ctx.textAlign='center';ctx.fillText(boss.name,W/2,H-32);drawBar(W/2-210,H-26,420,10,boss.hp/boss.maxhp,'#f33','#000');}
+// controls hint
+ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(8,H-30,560,22);ctx.fillStyle='#ccc';ctx.font='10px monospace';ctx.textAlign='left';ctx.fillText('WASD move · J/SPACE slash · K magic · SHIFT dash · E talk/portal · Q potion · M mute',14,H-15);
+// level message banner
+if(levelMsgT>0){ctx.globalAlpha=Math.min(1,levelMsgT);ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,120,W,60);ctx.fillStyle='#ffe66d';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.fillText(levelMsg,W/2,145);ctx.font='12px monospace';ctx.fillStyle='#fff';ctx.fillText(LEVELS[Math.min(level,2)].sub,W/2,162);ctx.globalAlpha=1;}
+// dialogue box
+if(dlg.active){const L=dlg.lines[dlg.i];ctx.fillStyle='rgba(5,5,20,.92)';ctx.fillRect(60,H-170,W-120,150);ctx.strokeStyle='#6c5ce7';ctx.lineWidth=3;ctx.strokeRect(60,H-170,W-120,150);
+const av=L[0]==='AQUA'?A.avAqua:L[0]==='GROM'?A.avGrom:L[0]==='VAELEN'?A.avVaelen:A.avYuna;
+if(av){ctx.save();ctx.imageSmoothingEnabled=true;ctx.drawImage(av,80,H-155,72,72);ctx.imageSmoothingEnabled=false;ctx.restore();}else{ctx.fillStyle='#f0f';ctx.fillRect(80,H-155,72,72);}
+ctx.fillStyle='#ffe66d';ctx.font='bold 14px monospace';ctx.textAlign='left';ctx.fillText(L[0],165,H-132);
+ctx.fillStyle='#fff';ctx.font='13px monospace';const txt=L[1].slice(0,Math.floor(dlg.chars));wrap(txt,165,H-110,W-260,18);
+ctx.fillStyle='#888';ctx.font='10px monospace';ctx.textAlign='right';ctx.fillText('[E]/click ▶',W-80,H-30);}
+// minimap
+ctx.fillStyle='rgba(0,0,0,.5)';ctx.fillRect(W-132,H-132,124,102);ctx.strokeStyle='#ffffff44';ctx.strokeRect(W-132,H-132,124,102);
+ctx.fillStyle='#5f5';ctx.fillRect(W-132+player.x/2400*124-2,H-132+player.y/1500*102-2,4,4);
+for(const e of enemies){if(e.dead)continue;ctx.fillStyle=e.boss?'#f00':'#fa0';ctx.fillRect(W-132+e.x/2400*124-1,H-132+e.y/1500*102-1,2,2);}
+for(const p of portals){ctx.fillStyle='#5ff';ctx.fillRect(W-132+p.x/2400*124-2,H-132+p.y/1500*102-2,4,4);}
+}
+if(screen==='title'){
+ctx.fillStyle='rgba(5,5,20,.82)';ctx.fillRect(0,0,W,H);
+if(A.bgForest)ctx.drawImage(A.bgForest,0,0,W,H);
+ctx.fillStyle='rgba(5,5,20,.72)';ctx.fillRect(0,0,W,H);
+ctx.textAlign='center';ctx.fillStyle='#ffe66d';ctx.font='bold 15px monospace';ctx.fillText('✦ GODDESS AQUA PRESENTS AN ISEKAI EPIC ✦',W/2,90);
+ctx.fillStyle='#fff';ctx.font='bold 52px monospace';ctx.fillText('AETHERIA',W/2,150);ctx.fillStyle='#5ff';ctx.font='bold 30px monospace';ctx.fillText('REBORN',W/2,188);
+ctx.fillStyle='#fd6';ctx.font='14px monospace';ctx.fillText('— The Otherworld Contract —',W/2,214);
+ctx.fillStyle='#ddd';ctx.font='13px monospace';
+ctx.fillText('Hit by Truck-kun, reborn as schoolgirl heroine YUNA.',W/2,252);
+ctx.fillText('3 realms · 8 enemy types · 2 bosses · magic · guild quests',W/2,272);
+ctx.fillStyle='#222a';ctx.fillRect(W/2-280,292,560,120);
+ctx.fillStyle='#9ff';ctx.font='12px monospace';ctx.fillText('⚔ J/Space: slash   ✦ K: Aqua magic   ➤ WASD: move   🧪 Q: potion',W/2,314);
+ctx.fillText('E: talk / enter portals   SHIFT: dash   M: mute   📱 mobile touch ready',W/2,334);
+ctx.fillStyle='#5f5';ctx.font='bold 13px monospace';ctx.fillText('ALL ART: YOUR CraftPix packs (slimes · minotaur · yokai · vampire · samurai · battlegrounds)',W/2,358);
+ctx.fillText('ALL AUDIO: procedural WebAudio SFX + BGM   ALL CODE: single file',W/2,378);
+if(Math.floor(time*2)%2===0){ctx.fillStyle='#ffe66d';ctx.font='bold 20px monospace';ctx.fillText('— PRESS ENTER / TAP TO BE REINCARNATED —',W/2,440);}
+ctx.fillStyle='#666';ctx.font='11px monospace';ctx.fillText('A Vanexa production · God-Tier Autonomous Build',W/2,510);
+}
+if(screen==='trans'){ctx.fillStyle=`rgba(10,5,30,${Math.min(1,1.4-transT)})`;ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 26px monospace';ctx.textAlign='center';ctx.fillText(level+1>2?'FINAL JUDGMENT…':'ENTERING '+(LEVELS[Math.min(2,level)].name||''),W/2,H/2);}
+if(screen==='over'){ctx.fillStyle='rgba(20,0,0,.85)';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle='#f33';ctx.font='bold 54px monospace';ctx.fillText('YOU DIED',W/2,220);ctx.fillStyle='#fff';ctx.font='14px monospace';ctx.fillText('Aqua rewinds fate… Level '+player.level+' · '+player.kills+' kills · '+player.gold+'G kept',W/2,260);ctx.fillStyle='#ffe66d';ctx.font='bold 18px monospace';if(Math.floor(time*2)%2===0)ctx.fillText('PRESS ENTER TO REINCARNATE',W/2,320);
+if(screen==='over'&&!render._oh){render._oh=true;setTimeout(()=>{if(screen==='over'){player.hp=player.maxhp;player.mp=player.maxmp;buildLevel(level);screen='play';startBGM();render._oh=false;}},4000);}}
+if(screen==='win'){ctx.fillStyle='rgba(5,10,25,.9)';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle='#ffe66d';ctx.font='bold 40px monospace';ctx.fillText('✦ RELIC REFORGED ✦',W/2,140);ctx.fillStyle='#fff';ctx.font='14px monospace';ctx.fillText('VAELEN falls. Aqua weeps. Two doors glow before Yuna…',W/2,180);
+ctx.fillStyle=vicChoice===0?'#5f54':'#222a';ctx.fillRect(W/2-380,220,350,120);ctx.strokeStyle=vicChoice===0?'#5f5':'#555';ctx.strokeRect(W/2-380,220,350,120);
+ctx.fillStyle=vicChoice===0?'#5f5':'#555';ctx.strokeRect(W/2+30,220,350,120);
+ctx.fillStyle='#fff';ctx.font='bold 15px monospace';ctx.fillText('◀ STAY IN AETHERIA',W/2-205,255);ctx.font='11px monospace';ctx.fillText('Marry into the Guild.',W/2-205,278);ctx.fillText('Slime farm. Happy end.',W/2-205,294);
+ctx.fillStyle='#fff';ctx.font='bold 15px monospace';ctx.fillText('RETURN TO EARTH ▶',W/2+205,255);ctx.font='11px monospace';ctx.fillText('Keep the memories.',W/2+205,278);ctx.fillText('Ace every exam. Legend.',W/2+205,294);
+ctx.fillStyle='#fd6';ctx.font='13px monospace';ctx.fillText(`Lv${player.level} · ${player.kills} kills · ${player.gold}G · ${player.fragments}/3 fragments`,W/2,390);
+if(Math.floor(time*2)%2===0){ctx.fillStyle='#fff';ctx.font='bold 15px monospace';ctx.fillText('← → CHOOSE · ENTER TO CONFIRM (replays)',W/2,430);}}
+}
+function wrap(t,x,y,mw,lh){const words=t.split(' ');let line='',yy=y;for(const w of words){const test=line?line+' '+w:w;if(ctx.measureText(test).width>mw){ctx.fillText(line,x,yy);line=w;yy+=lh;}else line=test;}ctx.fillText(line,x,yy);}
+
+/* ---------- LOOP ---------- */
+let last=0;
+function loop(ts){const dt=Math.min(.05,(ts-last)/1000||.016);last=ts;update(dt);render();requestAnimationFrame(loop);}
+(async()=>{await loadAssets();assetsReady=true;requestAnimationFrame(loop);})();
+</script>
+</body>
+</html>

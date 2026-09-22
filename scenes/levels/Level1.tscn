@@ -1,0 +1,7 @@
+[gd_scene format=3]
+
+[node name="Level_1_SlimePlains" type="Node2D"]
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+tile_set = null
+# Procedural 2D Grid (48x32) for whispering_village

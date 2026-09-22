@@ -1,0 +1,352 @@
+[
+  {
+    "level": 1,
+    "max_hp": 100,
+    "attack_damage": 15,
+    "xp_reward": 100,
+    "gold_drop": 15
+  },
+  {
+    "level": 2,
+    "max_hp": 115,
+    "attack_damage": 17,
+    "xp_reward": 112,
+    "gold_drop": 17
+  },
+  {
+    "level": 3,
+    "max_hp": 132,
+    "attack_damage": 20,
+    "xp_reward": 125,
+    "gold_drop": 18
+  },
+  {
+    "level": 4,
+    "max_hp": 152,
+    "attack_damage": 23,
+    "xp_reward": 140,
+    "gold_drop": 20
+  },
+  {
+    "level": 5,
+    "max_hp": 175,
+    "attack_damage": 26,
+    "xp_reward": 157,
+    "gold_drop": 22
+  },
+  {
+    "level": 6,
+    "max_hp": 201,
+    "attack_damage": 30,
+    "xp_reward": 176,
+    "gold_drop": 24
+  },
+  {
+    "level": 7,
+    "max_hp": 231,
+    "attack_damage": 35,
+    "xp_reward": 197,
+    "gold_drop": 27
+  },
+  {
+    "level": 8,
+    "max_hp": 266,
+    "attack_damage": 40,
+    "xp_reward": 221,
+    "gold_drop": 29
+  },
+  {
+    "level": 9,
+    "max_hp": 306,
+    "attack_damage": 46,
+    "xp_reward": 248,
+    "gold_drop": 32
+  },
+  {
+    "level": 10,
+    "max_hp": 352,
+    "attack_damage": 53,
+    "xp_reward": 277,
+    "gold_drop": 35
+  },
+  {
+    "level": 11,
+    "max_hp": 405,
+    "attack_damage": 61,
+    "xp_reward": 311,
+    "gold_drop": 39
+  },
+  {
+    "level": 12,
+    "max_hp": 465,
+    "attack_damage": 70,
+    "xp_reward": 348,
+    "gold_drop": 43
+  },
+  {
+    "level": 13,
+    "max_hp": 535,
+    "attack_damage": 80,
+    "xp_reward": 390,
+    "gold_drop": 47
+  },
+  {
+    "level": 14,
+    "max_hp": 615,
+    "attack_damage": 92,
+    "xp_reward": 436,
+    "gold_drop": 52
+  },
+  {
+    "level": 15,
+    "max_hp": 708,
+    "attack_damage": 106,
+    "xp_reward": 489,
+    "gold_drop": 57
+  },
+  {
+    "level": 16,
+    "max_hp": 814,
+    "attack_damage": 122,
+    "xp_reward": 547,
+    "gold_drop": 63
+  },
+  {
+    "level": 17,
+    "max_hp": 936,
+    "attack_damage": 140,
+    "xp_reward": 613,
+    "gold_drop": 69
+  },
+  {
+    "level": 18,
+    "max_hp": 1076,
+    "attack_damage": 161,
+    "xp_reward": 687,
+    "gold_drop": 76
+  },
+  {
+    "level": 19,
+    "max_hp": 1238,
+    "attack_damage": 186,
+    "xp_reward": 769,
+    "gold_drop": 83
+  },
+  {
+    "level": 20,
+    "max_hp": 1423,
+    "attack_damage": 213,
+    "xp_reward": 861,
+    "gold_drop": 92
+  },
+  {
+    "level": 21,
+    "max_hp": 1637,
+    "attack_damage": 245,
+    "xp_reward": 965,
+    "gold_drop": 101
+  },
+  {
+    "level": 22,
+    "max_hp": 1882,
+    "attack_damage": 282,
+    "xp_reward": 1080,
+    "gold_drop": 111
+  },
+  {
+    "level": 23,
+    "max_hp": 2164,
+    "attack_damage": 325,
+    "xp_reward": 1210,
+    "gold_drop": 122
+  },
+  {
+    "level": 24,
+    "max_hp": 2489,
+    "attack_damage": 373,
+    "xp_reward": 1355,
+    "gold_drop": 134
+  },
+  {
+    "level": 25,
+    "max_hp": 2863,
+    "attack_damage": 429,
+    "xp_reward": 1518,
+    "gold_drop": 148
+  },
+  {
+    "level": 26,
+    "max_hp": 3292,
+    "attack_damage": 494,
+    "xp_reward": 1700,
+    "gold_drop": 163
+  },
+  {
+    "level": 27,
+    "max_hp": 3786,
+    "attack_damage": 568,
+    "xp_reward": 1904,
+    "gold_drop": 179
+  },
+  {
+    "level": 28,
+    "max_hp": 4354,
+    "attack_damage": 653,
+    "xp_reward": 2132,
+    "gold_drop": 197
+  },
+  {
+    "level": 29,
+    "max_hp": 5007,
+    "attack_damage": 751,
+    "xp_reward": 2388,
+    "gold_drop": 216
+  },
+  {
+    "level": 30,
+    "max_hp": 5758,
+    "attack_damage": 864,
+    "xp_reward": 2675,
+    "gold_drop": 238
+  },
+  {
+    "level": 31,
+    "max_hp": 6621,
+    "attack_damage": 993,
+    "xp_reward": 2996,
+    "gold_drop": 262
+  },
+  {
+    "level": 32,
+    "max_hp": 7614,
+    "attack_damage": 1142,
+    "xp_reward": 3356,
+    "gold_drop": 288
+  },
+  {
+    "level": 33,
+    "max_hp": 8757,
+    "attack_damage": 1313,
+    "xp_reward": 3758,
+    "gold_drop": 317
+  },
+  {
+    "level": 34,
+    "max_hp": 10070,
+    "attack_damage": 1510,
+    "xp_reward": 4209,
+    "gold_drop": 348
+  },
+  {
+    "level": 35,
+    "max_hp": 11580,
+    "attack_damage": 1737,
+    "xp_reward": 4714,
+    "gold_drop": 383
+  },
+  {
+    "level": 36,
+    "max_hp": 13318,
+    "attack_damage": 1998,
+    "xp_reward": 5280,
+    "gold_drop": 422
+  },
+  {
+    "level": 37,
+    "max_hp": 15315,
+    "attack_damage": 2297,
+    "xp_reward": 5914,
+    "gold_drop": 464
+  },
+  {
+    "level": 38,
+    "max_hp": 17612,
+    "attack_damage": 2642,
+    "xp_reward": 6623,
+    "gold_drop": 510
+  },
+  {
+    "level": 39,
+    "max_hp": 20254,
+    "attack_damage": 3038,
+    "xp_reward": 7418,
+    "gold_drop": 561
+  },
+  {
+    "level": 40,
+    "max_hp": 23292,
+    "attack_damage": 3494,
+    "xp_reward": 8308,
+    "gold_drop": 617
+  },
+  {
+    "level": 41,
+    "max_hp": 26786,
+    "attack_damage": 4018,
+    "xp_reward": 9305,
+    "gold_drop": 679
+  },
+  {
+    "level": 42,
+    "max_hp": 30804,
+    "attack_damage": 4621,
+    "xp_reward": 10422,
+    "gold_drop": 747
+  },
+  {
+    "level": 43,
+    "max_hp": 35425,
+    "attack_damage": 5314,
+    "xp_reward": 11672,
+    "gold_drop": 821
+  },
+  {
+    "level": 44,
+    "max_hp": 40739,
+    "attack_damage": 6111,
+    "xp_reward": 13073,
+    "gold_drop": 904
+  },
+  {
+    "level": 45,
+    "max_hp": 46850,
+    "attack_damage": 7027,
+    "xp_reward": 14642,
+    "gold_drop": 994
+  },
+  {
+    "level": 46,
+    "max_hp": 53877,
+    "attack_damage": 8082,
+    "xp_reward": 16399,
+    "gold_drop": 1093
+  },
+  {
+    "level": 47,
+    "max_hp": 61958,
+    "attack_damage": 9294,
+    "xp_reward": 18367,
+    "gold_drop": 1203
+  },
+  {
+    "level": 48,
+    "max_hp": 71252,
+    "attack_damage": 10688,
+    "xp_reward": 20571,
+    "gold_drop": 1323
+  },
+  {
+    "level": 49,
+    "max_hp": 81940,
+    "attack_damage": 12291,
+    "xp_reward": 23039,
+    "gold_drop": 1455
+  },
+  {
+    "level": 50,
+    "max_hp": 94231,
+    "attack_damage": 14135,
+    "xp_reward": 25804,
+    "gold_drop": 1601
+  }
+]

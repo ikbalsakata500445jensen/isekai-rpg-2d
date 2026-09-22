@@ -1,0 +1,68 @@
+{
+  "goddess_aqua": {
+    "npc_id": "goddess_aqua",
+    "npc_name": "Goddess Aqua",
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "choices": [
+          {
+            "choice_text": "I accept the contract!",
+            "next_node_id": "blessing",
+            "set_quest_state": "quest_1_active"
+          },
+          {
+            "choice_text": "Who are you? Where am I?",
+            "next_node_id": "explain"
+          }
+        ],
+        "node_id": "awakening",
+        "text": "YUNA... Wake up, lost soul. Truck-kun has delivered you to AETHERIA. I am AQUA, goddess of rebirth. The Demon Lord VAELEN has shattered the Shadow Relic into 3 fragments. Will you sign the Otherworld Contract?"
+      }
+    ]
+  },
+  "guildmaster_grom": {
+    "npc_id": "guildmaster_grom",
+    "npc_name": "Grom the Guildmaster",
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "choices": [
+          {
+            "choice_text": "I'll clear the Catacombs. (Accept)",
+            "next_node_id": "catacombs_brief",
+            "set_quest_state": "quest_2_active"
+          },
+          {
+            "choice_text": "Tell me about the Minotaur King.",
+            "next_node_id": "minotaur_lore"
+          }
+        ],
+        "node_id": "guild_hall",
+        "text": "GROM: So Aqua dragged another one through the veil, eh? Listen, kid — skeletons pour from the FORGOTTEN CATACOMBS every night. The Minotaur King guards the second Relic Fragment. Prove yourself: bring me 5 Bone Charms."
+      }
+    ]
+  },
+  "demon_lord_vaelen": {
+    "npc_id": "demon_lord_vaelen",
+    "npc_name": "Demon Lord Vaelen",
+    "start_node_id": "start",
+    "nodes": [
+      {
+        "choices": [
+          {
+            "choice_text": "Aetheria doesn't need a tyrant! (Fight)",
+            "next_node_id": "boss_fight",
+            "set_quest_state": "quest_3_boss"
+          },
+          {
+            "choice_text": "Why did you shatter the Relic?",
+            "next_node_id": "vaelen_truth"
+          }
+        ],
+        "node_id": "throne",
+        "text": "VAELEN: Little summoned one... I was the FIRST summoned hero, a century ago. Aqua abandons every hero when the people stop worshipping. I shattered the Relic so no one else would be chained. Join me — or be unmade."
+      }
+    ]
+  }
+}

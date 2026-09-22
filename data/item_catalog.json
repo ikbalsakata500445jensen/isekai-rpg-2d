@@ -1,0 +1,397 @@
+{
+  "items": [
+    {
+      "id": "relic_shadow",
+      "name": "The Shadow Relic",
+      "type": "Relic",
+      "rarity": "Legendary",
+      "value": 5000,
+      "desc": "Primordial obsidian shard humming with void energy."
+    },
+    {
+      "id": "silver_key",
+      "name": "Silver Key of Sanctuary",
+      "type": "Relic",
+      "rarity": "Epic",
+      "value": 1200,
+      "desc": "Opens the inner wards of the Forgotten Catacombs."
+    },
+    {
+      "id": "health_potion_minor",
+      "name": "Minor Crimson Vial",
+      "type": "Consumable",
+      "rarity": "Common",
+      "value": 25,
+      "heal_amount": 50,
+      "desc": "Restores 50 health points instantly."
+    },
+    {
+      "id": "sword_iron_blade",
+      "name": "Forged Iron Broadsword",
+      "type": "Weapon",
+      "rarity": "Common",
+      "value": 150,
+      "attack_damage": 25,
+      "desc": "Standard issue village guard blade."
+    },
+    {
+      "id": "armor_shadow_plate",
+      "name": "Abyssal Steel Chestplate",
+      "type": "Armor",
+      "rarity": "Epic",
+      "value": 2400,
+      "defense": 65,
+      "desc": "Absorbs 15% of incoming shadow magic damage."
+    },
+    {
+      "id": "item_6_obsidian_elixir",
+      "name": "Obsidian Elixir",
+      "type": "Armor",
+      "rarity": "Epic",
+      "value": 270,
+      "attack_damage": 0,
+      "defense": 27,
+      "desc": "An ancient artifact from the Age of Obsi. Holds immense historical value."
+    },
+    {
+      "id": "item_7_gilded_signet ring",
+      "name": "Gilded Signet Ring",
+      "type": "Armor",
+      "rarity": "Common",
+      "value": 315,
+      "attack_damage": 0,
+      "defense": 29,
+      "desc": "An ancient artifact from the Age of Gild. Holds immense historical value."
+    },
+    {
+      "id": "item_8_ancient_shield",
+      "name": "Ancient Shield",
+      "type": "Armor",
+      "rarity": "Epic",
+      "value": 360,
+      "attack_damage": 0,
+      "defense": 31,
+      "desc": "An ancient artifact from the Age of Anci. Holds immense historical value."
+    },
+    {
+      "id": "item_9_shattered_greatsword",
+      "name": "Shattered Greatsword",
+      "type": "Weapon",
+      "rarity": "Rare",
+      "value": 405,
+      "attack_damage": 47,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Shat. Holds immense historical value."
+    },
+    {
+      "id": "item_10_ethereal_dagger",
+      "name": "Ethereal Dagger",
+      "type": "Weapon",
+      "rarity": "Rare",
+      "value": 450,
+      "attack_damage": 50,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Ethe. Holds immense historical value."
+    },
+    {
+      "id": "item_11_cursed_longsword",
+      "name": "Cursed Longsword",
+      "type": "Weapon",
+      "rarity": "Epic",
+      "value": 495,
+      "attack_damage": 53,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Curs. Holds immense historical value."
+    },
+    {
+      "id": "item_12_celestial_battleaxe",
+      "name": "Celestial Battleaxe",
+      "type": "Weapon",
+      "rarity": "Epic",
+      "value": 540,
+      "attack_damage": 56,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Cele. Holds immense historical value."
+    },
+    {
+      "id": "item_13_enchanted_grimoire",
+      "name": "Enchanted Grimoire",
+      "type": "Armor",
+      "rarity": "Epic",
+      "value": 585,
+      "attack_damage": 0,
+      "defense": 41,
+      "desc": "An ancient artifact from the Age of Ench. Holds immense historical value."
+    },
+    {
+      "id": "item_14_obsidian_gauntlets",
+      "name": "Obsidian Gauntlets",
+      "type": "Armor",
+      "rarity": "Common",
+      "value": 630,
+      "attack_damage": 0,
+      "defense": 43,
+      "desc": "An ancient artifact from the Age of Obsi. Holds immense historical value."
+    },
+    {
+      "id": "item_15_gilded_talisman",
+      "name": "Gilded Talisman",
+      "type": "Armor",
+      "rarity": "Legendary",
+      "value": 675,
+      "attack_damage": 0,
+      "defense": 45,
+      "desc": "An ancient artifact from the Age of Gild. Holds immense historical value."
+    },
+    {
+      "id": "item_16_ancient_elixir",
+      "name": "Ancient Elixir",
+      "type": "Armor",
+      "rarity": "Common",
+      "value": 720,
+      "attack_damage": 0,
+      "defense": 47,
+      "desc": "An ancient artifact from the Age of Anci. Holds immense historical value."
+    },
+    {
+      "id": "item_17_shattered_signet ring",
+      "name": "Shattered Signet Ring",
+      "type": "Armor",
+      "rarity": "Common",
+      "value": 765,
+      "attack_damage": 0,
+      "defense": 49,
+      "desc": "An ancient artifact from the Age of Shat. Holds immense historical value."
+    },
+    {
+      "id": "item_18_ethereal_shield",
+      "name": "Ethereal Shield",
+      "type": "Armor",
+      "rarity": "Rare",
+      "value": 810,
+      "attack_damage": 0,
+      "defense": 51,
+      "desc": "An ancient artifact from the Age of Ethe. Holds immense historical value."
+    },
+    {
+      "id": "item_19_cursed_greatsword",
+      "name": "Cursed Greatsword",
+      "type": "Weapon",
+      "rarity": "Uncommon",
+      "value": 855,
+      "attack_damage": 77,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Curs. Holds immense historical value."
+    },
+    {
+      "id": "item_20_celestial_dagger",
+      "name": "Celestial Dagger",
+      "type": "Weapon",
+      "rarity": "Common",
+      "value": 900,
+      "attack_damage": 80,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Cele. Holds immense historical value."
+    },
+    {
+      "id": "item_21_enchanted_longsword",
+      "name": "Enchanted Longsword",
+      "type": "Weapon",
+      "rarity": "Legendary",
+      "value": 945,
+      "attack_damage": 83,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Ench. Holds immense historical value."
+    },
+    {
+      "id": "item_22_obsidian_battleaxe",
+      "name": "Obsidian Battleaxe",
+      "type": "Weapon",
+      "rarity": "Legendary",
+      "value": 990,
+      "attack_damage": 86,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Obsi. Holds immense historical value."
+    },
+    {
+      "id": "item_23_gilded_grimoire",
+      "name": "Gilded Grimoire",
+      "type": "Armor",
+      "rarity": "Uncommon",
+      "value": 1035,
+      "attack_damage": 0,
+      "defense": 61,
+      "desc": "An ancient artifact from the Age of Gild. Holds immense historical value."
+    },
+    {
+      "id": "item_24_ancient_gauntlets",
+      "name": "Ancient Gauntlets",
+      "type": "Armor",
+      "rarity": "Rare",
+      "value": 1080,
+      "attack_damage": 0,
+      "defense": 63,
+      "desc": "An ancient artifact from the Age of Anci. Holds immense historical value."
+    },
+    {
+      "id": "item_25_shattered_talisman",
+      "name": "Shattered Talisman",
+      "type": "Armor",
+      "rarity": "Epic",
+      "value": 1125,
+      "attack_damage": 0,
+      "defense": 65,
+      "desc": "An ancient artifact from the Age of Shat. Holds immense historical value."
+    },
+    {
+      "id": "item_26_ethereal_elixir",
+      "name": "Ethereal Elixir",
+      "type": "Armor",
+      "rarity": "Legendary",
+      "value": 1170,
+      "attack_damage": 0,
+      "defense": 67,
+      "desc": "An ancient artifact from the Age of Ethe. Holds immense historical value."
+    },
+    {
+      "id": "item_27_cursed_signet ring",
+      "name": "Cursed Signet Ring",
+      "type": "Armor",
+      "rarity": "Common",
+      "value": 1215,
+      "attack_damage": 0,
+      "defense": 69,
+      "desc": "An ancient artifact from the Age of Curs. Holds immense historical value."
+    },
+    {
+      "id": "item_28_celestial_shield",
+      "name": "Celestial Shield",
+      "type": "Armor",
+      "rarity": "Epic",
+      "value": 1260,
+      "attack_damage": 0,
+      "defense": 71,
+      "desc": "An ancient artifact from the Age of Cele. Holds immense historical value."
+    },
+    {
+      "id": "item_29_enchanted_greatsword",
+      "name": "Enchanted Greatsword",
+      "type": "Weapon",
+      "rarity": "Legendary",
+      "value": 1305,
+      "attack_damage": 107,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Ench. Holds immense historical value."
+    },
+    {
+      "id": "item_30_obsidian_dagger",
+      "name": "Obsidian Dagger",
+      "type": "Weapon",
+      "rarity": "Uncommon",
+      "value": 1350,
+      "attack_damage": 110,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Obsi. Holds immense historical value."
+    },
+    {
+      "id": "item_31_gilded_longsword",
+      "name": "Gilded Longsword",
+      "type": "Weapon",
+      "rarity": "Rare",
+      "value": 1395,
+      "attack_damage": 113,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Gild. Holds immense historical value."
+    },
+    {
+      "id": "item_32_ancient_battleaxe",
+      "name": "Ancient Battleaxe",
+      "type": "Weapon",
+      "rarity": "Legendary",
+      "value": 1440,
+      "attack_damage": 116,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Anci. Holds immense historical value."
+    },
+    {
+      "id": "item_33_shattered_grimoire",
+      "name": "Shattered Grimoire",
+      "type": "Armor",
+      "rarity": "Epic",
+      "value": 1485,
+      "attack_damage": 0,
+      "defense": 81,
+      "desc": "An ancient artifact from the Age of Shat. Holds immense historical value."
+    },
+    {
+      "id": "item_34_ethereal_gauntlets",
+      "name": "Ethereal Gauntlets",
+      "type": "Armor",
+      "rarity": "Uncommon",
+      "value": 1530,
+      "attack_damage": 0,
+      "defense": 83,
+      "desc": "An ancient artifact from the Age of Ethe. Holds immense historical value."
+    },
+    {
+      "id": "item_35_cursed_talisman",
+      "name": "Cursed Talisman",
+      "type": "Armor",
+      "rarity": "Common",
+      "value": 1575,
+      "attack_damage": 0,
+      "defense": 85,
+      "desc": "An ancient artifact from the Age of Curs. Holds immense historical value."
+    },
+    {
+      "id": "item_36_celestial_elixir",
+      "name": "Celestial Elixir",
+      "type": "Armor",
+      "rarity": "Rare",
+      "value": 1620,
+      "attack_damage": 0,
+      "defense": 87,
+      "desc": "An ancient artifact from the Age of Cele. Holds immense historical value."
+    },
+    {
+      "id": "item_37_enchanted_signet ring",
+      "name": "Enchanted Signet Ring",
+      "type": "Armor",
+      "rarity": "Rare",
+      "value": 1665,
+      "attack_damage": 0,
+      "defense": 89,
+      "desc": "An ancient artifact from the Age of Ench. Holds immense historical value."
+    },
+    {
+      "id": "item_38_obsidian_shield",
+      "name": "Obsidian Shield",
+      "type": "Armor",
+      "rarity": "Rare",
+      "value": 1710,
+      "attack_damage": 0,
+      "defense": 91,
+      "desc": "An ancient artifact from the Age of Obsi. Holds immense historical value."
+    },
+    {
+      "id": "item_39_gilded_greatsword",
+      "name": "Gilded Greatsword",
+      "type": "Weapon",
+      "rarity": "Legendary",
+      "value": 1755,
+      "attack_damage": 137,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Gild. Holds immense historical value."
+    },
+    {
+      "id": "item_40_ancient_dagger",
+      "name": "Ancient Dagger",
+      "type": "Weapon",
+      "rarity": "Uncommon",
+      "value": 1800,
+      "attack_damage": 140,
+      "defense": 0,
+      "desc": "An ancient artifact from the Age of Anci. Holds immense historical value."
+    }
+  ]
+}
